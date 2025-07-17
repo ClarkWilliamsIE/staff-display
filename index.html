@@ -78,29 +78,39 @@
       const roomsContainer = document.getElementById('rooms');
       const monthlyGrid = document.getElementById('monthly-grid');
       const today = new Date();
-      const tomorrow = new Date();
-      tomorrow.setHours(23, 59, 59, 999);
-      const weekEnd = new Date(today);
-      weekEnd.setDate(today.getDate() + 6);
-      weekEnd.setHours(23, 59, 59, 999);
       const monthEnd = new Date(today);
       monthEnd.setDate(today.getDate() + 30);
 
       const eventsByDay = Array.from({ length: 31 }, () => []);
 
       for (const cal of calendars) {
-        const isJP = cal.id.includes('b0228e24');
-        const timeMin = isJP ? today.toISOString() : today.toISOString();
-        const timeMax = isJP ? weekEnd.toISOString() : tomorrow.toISOString();
+        let timeMin, timeMax;
+        if (cal.id.includes('b0228e24')) {
+          const weekStart = new Date();
+          weekStart.setHours(0, 0, 0, 0);
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+          weekEnd.setHours(23, 59, 59, 999);
+          timeMin = weekStart.toISOString();
+          timeMax = weekEnd.toISOString();
+        } else {
+          const todayStart = new Date();
+          todayStart.setHours(0, 0, 0, 0);
+          const todayEnd = new Date();
+          todayEnd.setHours(23, 59, 59, 999);
+          timeMin = todayStart.toISOString();
+          timeMax = todayEnd.toISOString();
+        }
+
         const events = await fetchEvents(cal.id, timeMin, timeMax);
         const roomColor = roomColors[cal.id] || 'bg-gray-100';
 
         const card = document.createElement('div');
         card.className = `${roomColor} border border-gray-300 p-4 rounded-lg shadow-md`;
-        card.innerHTML = `<h3 class="card-title mb-3">${cal.name}${isJP ? ' (This Week)' : ''}</h3>`;
+        card.innerHTML = `<h3 class="card-title mb-3">${cal.name}${cal.id.includes('b0228e24') ? ' (This Week)' : ''}</h3>`;
 
         if (events.length === 0) {
-          card.innerHTML += `<p class="text-gray-600">No events${isJP ? ' this week' : ' today'}</p>`;
+          card.innerHTML += `<p class="text-gray-600">No events${cal.id.includes('b0228e24') ? ' this week' : ' today'}</p>`;
         } else {
           const list = document.createElement('ul');
           list.className = 'space-y-2';
@@ -109,10 +119,10 @@
             const startTime = formatTime(event.start.dateTime || event.start.date);
             const endTime = formatTime(event.end.dateTime || event.end.date);
             const date = new Date(event.start.dateTime || event.start.date);
-            const day = isJP ? date.toLocaleDateString([], { weekday: 'long' }) : '';
+            const day = cal.id.includes('b0228e24') ? date.toLocaleDateString([], { weekday: 'long' }) : '';
             const li = document.createElement('li');
             li.className = 'cursor-pointer';
-            li.innerHTML = isJP
+            li.innerHTML = cal.id.includes('b0228e24')
               ? `<div class="event-title text-sm">${day} – ${startTime} – ${endTime}</div>`
               : `<div class="event-title flex justify-between items-center"><span>${event.summary}</span><span class="rounded px-2 py-0.5 text-sm bg-white">${startTime} – ${endTime}</span></div>`;
             li.onclick = () => {
@@ -173,3 +183,4 @@
   </script>
 </body>
 </html>
+
