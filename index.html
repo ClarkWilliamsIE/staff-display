@@ -22,10 +22,10 @@
   <!-- Event Cards -->
   <div id="rooms" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
 
-  <!-- Upcoming Week Grid -->
+  <!-- Upcoming 31 Day Horizontal Scroll Grid -->
   <div class="mt-8 border border-gray-300 p-6 rounded-lg shadow-md w-full">
-    <h2 class="text-2xl font-bold mb-6 text-center">In the next 7 days</h2>
-    <div id="weekly-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 text-base"></div>
+    <h2 class="text-2xl font-bold mb-6 text-center">In the next 31 days</h2>
+    <div id="monthly-grid" class="flex gap-4 overflow-x-auto text-base"></div>
   </div>
 
   <!-- Modal -->
@@ -76,19 +76,18 @@
 
     async function init() {
       const roomsContainer = document.getElementById('rooms');
-      const weeklyGrid = document.getElementById('weekly-grid');
-      const weekStart = new Date();
-      weekStart.setHours(0, 0, 0, 0);
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekEnd.getDate() + 6);
-      weekEnd.setHours(23, 59, 59, 999);
-      const eventsByDay = Array.from({ length: 7 }, () => []);
+      const monthlyGrid = document.getElementById('monthly-grid');
+      const today = new Date();
+      const monthEnd = new Date(today);
+      monthEnd.setDate(today.getDate() + 30);
+
+      const eventsByDay = Array.from({ length: 31 }, () => []);
 
       for (const cal of calendars) {
         const isJP = cal.id.includes('b0228e24');
-        const start = isJP ? weekStart : new Date();
-        const end = isJP ? weekEnd : new Date();
-        if (!isJP) end.setHours(23, 59, 59, 999);
+        const start = isJP ? today : new Date();
+        const end = isJP ? monthEnd : new Date();
+        end.setHours(23, 59, 59, 999);
 
         const timeMin = start.toISOString();
         const timeMax = end.toISOString();
@@ -97,10 +96,10 @@
 
         const card = document.createElement('div');
         card.className = `${roomColor} border border-gray-300 p-4 rounded-lg shadow-md`;
-        card.innerHTML = `<h3 class="card-title mb-3">${cal.name}${isJP ? ' (This Week)' : ''}</h3>`;
+        card.innerHTML = `<h3 class="card-title mb-3">${cal.name}${isJP ? ' (This Month)' : ''}</h3>`;
 
         if (events.length === 0) {
-          card.innerHTML += `<p class="text-gray-600">No events${isJP ? ' this week' : ' today'}</p>`;
+          card.innerHTML += `<p class="text-gray-600">No events${isJP ? ' this month' : ' today'}</p>`;
         } else {
           const list = document.createElement('ul');
           list.className = 'space-y-2';
@@ -129,22 +128,22 @@
 
         roomsContainer.appendChild(card);
 
-        if (!isJP) {
-          const weekEvents = await fetchEvents(cal.id, weekStart.toISOString(), weekEnd.toISOString());
-          for (const e of weekEvents) {
-            const date = new Date(e.start.dateTime || e.start.date);
-            const index = (date.getDay() - weekStart.getDay() + 7) % 7;
+        const monthEvents = await fetchEvents(cal.id, today.toISOString(), monthEnd.toISOString());
+        for (const e of monthEvents) {
+          const date = new Date(e.start.dateTime || e.start.date);
+          const index = Math.floor((date - today) / (1000 * 60 * 60 * 24));
+          if (index >= 0 && index < 31) {
             eventsByDay[index].push({ ...e, calId: cal.id });
           }
         }
       }
 
-      for (let i = 0; i < 7; i++) {
-        const date = new Date(weekStart);
-        date.setDate(weekStart.getDate() + i);
+      for (let i = 0; i < 31; i++) {
+        const date = new Date();
+        date.setDate(today.getDate() + i);
         const label = date.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
         const col = document.createElement('div');
-        col.className = 'bg-gray-100 rounded-lg p-3 h-full';
+        col.className = 'min-w-[200px] bg-gray-100 rounded-lg p-3';
         col.innerHTML = `<h4 class="text-lg font-semibold text-center mb-2">${label}</h4>`;
 
         const dayEvents = eventsByDay[i];
@@ -165,7 +164,7 @@
 
           col.appendChild(ul);
         }
-        weeklyGrid.appendChild(col);
+        monthlyGrid.appendChild(col);
       }
     }
 
