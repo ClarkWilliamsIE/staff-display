@@ -145,7 +145,6 @@
           const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
           const todayLocal = new Date(today.getFullYear(), today.getMonth(), today.getDate());
           const index = Math.round((localDate - todayLocal) / (1000 * 60 * 60 * 24));
-
           if (index >= 0 && index < 31) {
             eventsByDay[index].push({ ...e, calId: cal.id });
           }
@@ -172,7 +171,15 @@
             const end = formatTime(e.end.dateTime || e.end.date);
             const colorClass = roomColors[e.calId] || 'bg-gray-300';
             const li = document.createElement('li');
+            li.className = 'cursor-pointer';
             li.innerHTML = `<div class="flex justify-between items-center text-sm"><span>${e.summary}</span><span class="rounded px-2 py-0.5 ${colorClass}">${start} – ${end}</span></div>`;
+            li.onclick = () => {
+              document.getElementById('modal-summary').textContent = e.summary || 'No title';
+              document.getElementById('modal-time').textContent = `${start} – ${end}`;
+              document.getElementById('modal-location').textContent = e.location || 'No location specified';
+              document.getElementById('modal-description').innerHTML = e.description || 'No description provided';
+              document.getElementById('event-modal').checked = true;
+            };
             ul.appendChild(li);
           }
 
