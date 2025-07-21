@@ -48,22 +48,18 @@
   </style>
 </head>
 <body class="p-8 space-y-12">
-  <!-- Header -->
   <div class="flex justify-between items-center">
     <h1 class="text-4xl font-bold text-gray-800">Paraparaumu Library Schedule</h1>
     <span id="current-date" class="text-2xl font-medium text-gray-600"></span>
   </div>
 
-  <!-- Event Cards -->
   <div id="rooms" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
 
-  <!-- Upcoming 31 Day Horizontal Scroll Grid -->
   <div class="mt-8 p-6 rounded-xl ios-card">
     <h2 class="text-2xl font-bold mb-6 text-center">In the next 31 days</h2>
     <div id="monthly-grid" class="flex gap-4 overflow-x-auto text-base scrollbar-hide"></div>
   </div>
 
-  <!-- Modal -->
   <input type="checkbox" id="event-modal" class="modal-toggle"/>
   <div class="modal">
     <div class="modal-box bg-white text-gray-800 relative">
@@ -124,7 +120,7 @@
           const weekStart = new Date();
           weekStart.setHours(0, 0, 0, 0);
           const weekEnd = new Date(weekStart);
-          weekEnd.setDate(weekEnd.getDate() + 6);
+          weekEnd.setDate(weekStart.getDate() + 6);
           weekEnd.setHours(23, 59, 59, 999);
           timeMin = weekStart.toISOString();
           timeMax = weekEnd.toISOString();
@@ -149,7 +145,6 @@
         } else {
           const list = document.createElement('ul');
           list.className = 'space-y-2';
-
           for (const event of events) {
             const startTime = formatTime(event.start.dateTime || event.start.date);
             const endTime = formatTime(event.end.dateTime || event.end.date);
