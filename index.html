@@ -5,61 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Library "What’s On - Paraparaumu Library" Display</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@2.51.5/dist/full.css" rel="stylesheet"/>
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: linear-gradient(135deg, #f0f4f8, #e9eff5);
-      color: #1f2937;
-      overflow-x: hidden;
-    }
-    .card-title {
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: #111827;
-    }
-    .event-title {
-      font-size: 1rem;
-      font-weight: 500;
-    }
-    .ios-card {
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 1rem;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .ios-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    }
-    .scrollbar-hide::-webkit-scrollbar {
-      display: none;
-    }
-    .scrollbar-hide {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    .room-border {
-      border-top-width: 6px;
-      border-radius: 0.75rem;
-    }
+    body { font-family: sans-serif; overflow-x: hidden; }
+    .card-title { word-wrap: break-word; white-space: normal; font-size: 1.5rem; font-weight: bold; }
+    .event-title { font-size: 1.1rem; font-weight: 600; }
   </style>
 </head>
-<body class="p-8 space-y-12">
+<body class="bg-white text-black p-8 space-y-12">
+  <!-- Header -->
   <div class="flex justify-between items-center">
-    <h1 class="text-4xl font-bold text-gray-800">Paraparaumu Library Schedule</h1>
-    <span id="current-date" class="text-2xl font-medium text-gray-600"></span>
+    <h1 class="text-4xl font-bold">Paraparaumu Library Schedule</h1>
+    <span id="current-date" class="text-2xl font-medium"></span>
   </div>
 
+  <!-- Event Cards -->
   <div id="rooms" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
 
-  <div class="mt-8 p-6 rounded-xl ios-card">
+  <!-- Upcoming 31 Day Horizontal Scroll Grid -->
+  <div class="mt-8 border border-gray-300 p-6 rounded-lg shadow-md w-full">
     <h2 class="text-2xl font-bold mb-6 text-center">In the next 31 days</h2>
-    <div id="monthly-grid" class="flex gap-4 overflow-x-auto text-base scrollbar-hide"></div>
+    <div id="monthly-grid" class="flex gap-4 overflow-x-auto text-base"></div>
   </div>
 
+  <!-- Modal -->
   <input type="checkbox" id="event-modal" class="modal-toggle"/>
   <div class="modal">
     <div class="modal-box bg-white text-gray-800 relative">
@@ -71,16 +40,16 @@
     </div>
   </div>
 
-  <script>
+  <script type="text/javascript">
     const API_KEY = 'AIzaSyD2qBhlb_rQHGh3kJ_ENFrxsRoFFmfrX8A';
     const roomColors = {
-      'paraparaumumake@gmail.com': 'bg-blue-100 border-blue-400',
-      '99cb749e0421c837039bebfa2773ec2b696f4cbb5c8e1db0a27f071c38e871be@group.calendar.google.com': 'bg-green-100 border-green-400',
-      'b952fc7ae8ea23d6f8648ee78ec4bbe830ecd5aa55266eb5a715bbcd3129718a@group.calendar.google.com': 'bg-orange-100 border-orange-400',
-      '9d751487e4a33f27971ca1b54bd27d82b56d39278aabd6bcb562c431979396a2@group.calendar.google.com': 'bg-yellow-100 border-yellow-400',
-      'bf9774fd9a1f9cf44aff3d1ee97ef2a5e30789ef17f99ba846c3a780850f7e7a@group.calendar.google.com': 'bg-pink-100 border-pink-400',
-      '583fc72e7af8b504711782c092a5e3c8ea73eda4d2e4d87128c0e78d471be68c@group.calendar.google.com': 'bg-purple-100 border-purple-400',
-      'b0228e246833cd5cafecfbbdda140afec688229319ee1a9643d5043abc0f2d46@group.calendar.google.com': 'bg-red-100 border-red-400'
+      'paraparaumumake@gmail.com': 'bg-blue-100',
+      '99cb749e0421c837039bebfa2773ec2b696f4cbb5c8e1db0a27f071c38e871be@group.calendar.google.com': 'bg-green-100',
+      'b952fc7ae8ea23d6f8648ee78ec4bbe830ecd5aa55266eb5a715bbcd3129718a@group.calendar.google.com': 'bg-orange-100',
+      '9d751487e4a33f27971ca1b54bd27d82b56d39278aabd6bcb562c431979396a2@group.calendar.google.com': 'bg-yellow-100',
+      'bf9774fd9a1f9cf44aff3d1ee97ef2a5e30789ef17f99ba846c3a780850f7e7a@group.calendar.google.com': 'bg-pink-100',
+      '583fc72e7af8b504711782c092a5e3c8ea73eda4d2e4d87128c0e78d471be68c@group.calendar.google.com': 'bg-purple-100',
+      'b0228e246833cd5cafecfbbdda140afec688229319ee1a9643d5043abc0f2d46@group.calendar.google.com': 'bg-red-100'
     };
 
     const calendars = [
@@ -120,7 +89,7 @@
           const weekStart = new Date();
           weekStart.setHours(0, 0, 0, 0);
           const weekEnd = new Date(weekStart);
-          weekEnd.setDate(weekStart.getDate() + 6);
+          weekEnd.setDate(weekEnd.getDate() + 6);
           weekEnd.setHours(23, 59, 59, 999);
           timeMin = weekStart.toISOString();
           timeMax = weekEnd.toISOString();
@@ -134,24 +103,27 @@
         }
 
         const events = await fetchEvents(cal.id, timeMin, timeMax);
-        const colorClass = roomColors[cal.id] || 'bg-gray-100 border-gray-400';
+        const roomColor = roomColors[cal.id] || 'bg-gray-100';
 
         const card = document.createElement('div');
-        card.className = `ios-card p-4 room-border ${colorClass}`;
+        card.className = `${roomColor} border border-gray-300 p-4 rounded-lg shadow-md`;
         card.innerHTML = `<h3 class="card-title mb-3">${cal.name}${cal.id.includes('b0228e24') ? ' (This Week)' : ''}</h3>`;
 
         if (events.length === 0) {
-          card.innerHTML += `<p class="text-gray-500">No events${cal.id.includes('b0228e24') ? ' this week' : ' today'}</p>`;
+          card.innerHTML += `<p class="text-gray-600">No events${cal.id.includes('b0228e24') ? ' this week' : ' today'}</p>`;
         } else {
           const list = document.createElement('ul');
           list.className = 'space-y-2';
+
           for (const event of events) {
             const startTime = formatTime(event.start.dateTime || event.start.date);
             const endTime = formatTime(event.end.dateTime || event.end.date);
+            const date = new Date(event.start.dateTime || event.start.date);
+            const day = cal.id.includes('b0228e24') ? date.toLocaleDateString([], { weekday: 'long' }) : '';
             const li = document.createElement('li');
             li.className = 'cursor-pointer';
             li.innerHTML = cal.id.includes('b0228e24')
-              ? `<div class="event-title text-sm">${event.start.date ? new Date(event.start.date).toLocaleDateString([], { weekday: 'long' }) : ''} – ${startTime} – ${endTime}</div>`
+              ? `<div class="event-title text-sm">${day} – ${startTime} – ${endTime}</div>`
               : `<div class="event-title flex justify-between items-center"><span>${event.summary}</span><span class="rounded px-2 py-0.5 text-sm bg-white">${startTime} – ${endTime}</span></div>`;
             li.onclick = () => {
               document.getElementById('modal-summary').textContent = event.summary || 'No title';
@@ -184,7 +156,7 @@
         date.setDate(today.getDate() + i);
         const label = date.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
         const col = document.createElement('div');
-        col.className = 'min-w-[220px] ios-card p-3';
+        col.className = 'min-w-[200px] bg-gray-100 rounded-lg p-3';
         col.innerHTML = `<h4 class="text-lg font-semibold text-center mb-2">${label}</h4>`;
 
         const dayEvents = eventsByDay[i];
@@ -197,10 +169,10 @@
           for (const e of dayEvents) {
             const start = formatTime(e.start.dateTime || e.start.date);
             const end = formatTime(e.end.dateTime || e.end.date);
-            const colorClass = roomColors[e.calId]?.split(' ')[0] || 'bg-gray-300';
+            const colorClass = roomColors[e.calId] || 'bg-gray-300';
             const li = document.createElement('li');
-            li.className = `cursor-pointer ${colorClass} rounded px-2 py-1`;
-            li.innerHTML = `<div class="flex justify-between items-center text-sm font-medium"><span>${e.summary}</span><span>${start} – ${end}</span></div>`;
+            li.className = 'cursor-pointer';
+            li.innerHTML = `<div class="flex justify-between items-center text-sm"><span>${e.summary}</span><span class="rounded px-2 py-0.5 ${colorClass}">${start} – ${end}</span></div>`;
             li.onclick = () => {
               document.getElementById('modal-summary').textContent = e.summary || 'No title';
               document.getElementById('modal-time').textContent = `${start} – ${end}`;
@@ -221,4 +193,3 @@
   </script>
 </body>
 </html>
-
