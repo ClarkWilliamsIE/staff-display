@@ -41,6 +41,10 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+    .room-border {
+      border-top-width: 6px;
+      border-radius: 0.75rem;
+    }
   </style>
 </head>
 <body class="p-8 space-y-12">
@@ -74,13 +78,13 @@
   <script>
     const API_KEY = 'AIzaSyD2qBhlb_rQHGh3kJ_ENFrxsRoFFmfrX8A';
     const roomColors = {
-      'paraparaumumake@gmail.com': 'bg-blue-100',
-      '99cb749e0421c837039bebfa2773ec2b696f4cbb5c8e1db0a27f071c38e871be@group.calendar.google.com': 'bg-green-100',
-      'b952fc7ae8ea23d6f8648ee78ec4bbe830ecd5aa55266eb5a715bbcd3129718a@group.calendar.google.com': 'bg-orange-100',
-      '9d751487e4a33f27971ca1b54bd27d82b56d39278aabd6bcb562c431979396a2@group.calendar.google.com': 'bg-yellow-100',
-      'bf9774fd9a1f9cf44aff3d1ee97ef2a5e30789ef17f99ba846c3a780850f7e7a@group.calendar.google.com': 'bg-pink-100',
-      '583fc72e7af8b504711782c092a5e3c8ea73eda4d2e4d87128c0e78d471be68c@group.calendar.google.com': 'bg-purple-100',
-      'b0228e246833cd5cafecfbbdda140afec688229319ee1a9643d5043abc0f2d46@group.calendar.google.com': 'bg-red-100'
+      'paraparaumumake@gmail.com': 'bg-blue-100 border-blue-400',
+      '99cb749e0421c837039bebfa2773ec2b696f4cbb5c8e1db0a27f071c38e871be@group.calendar.google.com': 'bg-green-100 border-green-400',
+      'b952fc7ae8ea23d6f8648ee78ec4bbe830ecd5aa55266eb5a715bbcd3129718a@group.calendar.google.com': 'bg-orange-100 border-orange-400',
+      '9d751487e4a33f27971ca1b54bd27d82b56d39278aabd6bcb562c431979396a2@group.calendar.google.com': 'bg-yellow-100 border-yellow-400',
+      'bf9774fd9a1f9cf44aff3d1ee97ef2a5e30789ef17f99ba846c3a780850f7e7a@group.calendar.google.com': 'bg-pink-100 border-pink-400',
+      '583fc72e7af8b504711782c092a5e3c8ea73eda4d2e4d87128c0e78d471be68c@group.calendar.google.com': 'bg-purple-100 border-purple-400',
+      'b0228e246833cd5cafecfbbdda140afec688229319ee1a9643d5043abc0f2d46@group.calendar.google.com': 'bg-red-100 border-red-400'
     };
 
     const calendars = [
@@ -134,10 +138,10 @@
         }
 
         const events = await fetchEvents(cal.id, timeMin, timeMax);
-        const roomColor = roomColors[cal.id] || 'bg-gray-100';
+        const colorClass = roomColors[cal.id] || 'bg-gray-100 border-gray-400';
 
         const card = document.createElement('div');
-        card.className = `ios-card p-4`;
+        card.className = `ios-card p-4 room-border ${colorClass}`;
         card.innerHTML = `<h3 class="card-title mb-3">${cal.name}${cal.id.includes('b0228e24') ? ' (This Week)' : ''}</h3>`;
 
         if (events.length === 0) {
@@ -198,10 +202,10 @@
           for (const e of dayEvents) {
             const start = formatTime(e.start.dateTime || e.start.date);
             const end = formatTime(e.end.dateTime || e.end.date);
-            const colorClass = roomColors[e.calId] || 'bg-gray-300';
+            const colorClass = roomColors[e.calId]?.split(' ')[0] || 'bg-gray-300';
             const li = document.createElement('li');
-            li.className = 'cursor-pointer';
-            li.innerHTML = `<div class="flex justify-between items-center text-sm"><span>${e.summary}</span><span class="rounded px-2 py-0.5 ${colorClass}">${start} – ${end}</span></div>`;
+            li.className = `cursor-pointer ${colorClass} rounded px-2 py-1`;
+            li.innerHTML = `<div class="flex justify-between items-center text-sm font-medium"><span>${e.summary}</span><span>${start} – ${end}</span></div>`;
             li.onclick = () => {
               document.getElementById('modal-summary').textContent = e.summary || 'No title';
               document.getElementById('modal-time').textContent = `${start} – ${end}`;
@@ -222,3 +226,4 @@
   </script>
 </body>
 </html>
+
